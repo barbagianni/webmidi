@@ -37,7 +37,7 @@
             window.inputs = this._midiAccess.inputs();
             var input = this._midiAccess.inputs()[index];
             if (!input) {
-                console.warn('Midi input #' + index + 'not found!');
+                console.warn('Midi input #' + index + ' not found!');
                 return;
             }
             input.onmidimessage = this.onMessage.bind(this);
