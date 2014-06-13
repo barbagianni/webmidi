@@ -58,6 +58,10 @@
 
         registerAction: function (filter, action) {
             this._actions[filter] = action;
+        },
+
+        midiAccessPromise: function () {
+            return this._accessPromise;
         }
     };
 
