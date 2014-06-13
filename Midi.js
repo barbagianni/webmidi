@@ -5,6 +5,14 @@
         root.Midi = factory(root.b);
     }
 })(this, function () {
+    /**
+     * A Web MIDI input mapper.
+     *
+     * http://www.w3.org/TR/webmidi/
+     *
+     * @class Midi
+     * @constructor
+     */
     var Midi = function () {
         this._actions = {};
         if (!navigator.requestMIDIAccess) {
@@ -27,8 +35,13 @@
         _actions: null,
         _accessPromise: null,
 
+        /**
+         * Set the mapper to react (exclusively) to MIDI messages of the given input.
+         *
+         * @param {number} index
+         */
         selectInput: function (index) {
-            if (this._selectedIndex) {
+            if (this._selectedIndex !== null) {
                 this._midiAccess.inputs()[this._selectedIndex].onmidimessage = undefined;
                 this._selectedIndex = null;
             }
@@ -40,11 +53,11 @@
                 console.warn('Midi input #' + index + ' not found!');
                 return;
             }
-            input.onmidimessage = this.onMessage.bind(this);
+            input.onmidimessage = this._onMessage.bind(this);
             this._selectedIndex = index;
         },
 
-        onMessage: function (event) {
+        _onMessage: function (event) {
             var data = event.data,
                 actionDescriptor = pad(data[0].toString(16), 0, 2) +
                     pad(data[1].toString(16), 0, 2) +
@@ -56,10 +69,27 @@
             console.log('Calling action handler for "' + actionDescriptor + '"');
         },
 
+        /**
+         * Register an action that is executed, if a MIDI message with the given filter pattern is received.
+         *
+         * The filter pattern is Status and data bytes in hex notation concatenated.
+         *
+         * http://www.w3.org/TR/webmidi/#midimessageevent-interface
+         *
+         * @param {string} filter
+         * @param {function(MIDIMessageEvent)} action
+         */
         registerAction: function (filter, action) {
             this._actions[filter] = action;
         },
 
+        /**
+         * Is resolved with the MIDI access object.
+         *
+         * http://www.w3.org/TR/webmidi/#midiaccess-interface
+         *
+         * @return {Promise}
+         */
         midiAccessPromise: function () {
             return this._accessPromise;
         }
